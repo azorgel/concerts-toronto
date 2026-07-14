@@ -1,0 +1,25 @@
+name: Update Concerts
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # daily at 8am UTC
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run scraper
+        run: python3 scrape.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Update concerts $(date -u +%Y-%m-%d)"
+          git push
